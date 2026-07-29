@@ -1,0 +1,2154 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dicional</title>
+    <style>
+      /* ===== CONFIG DE TEMA (ajuste as cores aqui se quiser mudar a identidade visual) ===== */
+      :root {
+        --cor-primaria: #094fb3;
+        --cor-primaria-escura: #0043a5;
+        --cor-perigo: #c6200e;
+        --cor-sucesso: #27ae60;
+        --cor-aviso: #f39c12;
+        --raio: 10px;
+      }
+      html[data-tema="light"] {
+        --bg: #f5f6fa;
+        --bg-card: #ffffff;
+        --texto: #2d3436;
+        --texto-suave: #636e72;
+        --borda: #dfe4ea;
+      }
+      html[data-tema="dark"] {
+        --bg: #1a1e26;
+        --bg-card: #24293a;
+        --texto: #e8e8f0;
+        --texto-suave: #9a9ab0;
+        --borda: #35374f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--texto);
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      button {
+        cursor: pointer;
+        border: none;
+        border-radius: var(--raio);
+        font-family: inherit;
+        font-size: 14px;
+        padding: 8px 14px;
+      }
+      input,
+      select,
+      textarea {
+        font-family: inherit;
+        font-size: 14px;
+        padding: 8px 10px;
+        border-radius: var(--raio);
+        border: 1px solid var(--borda);
+        background: var(--bg-card);
+        color: var(--texto);
+      }
+      .btn-primario {
+        background: var(--cor-primaria);
+        color: #fff;
+      }
+      .btn-primario:hover {
+        background: var(--cor-primaria-escura);
+      }
+      .btn-perigo {
+        background: var(--cor-perigo);
+        color: #fff;
+        /* background: var(--borda); */
+      }
+      .btn-neutro {
+        background: var(--borda);
+        color: var(--texto);
+      }
+      .oculto {
+        display: none !important;
+      }
+
+      /* ---------- LOGIN ---------- */
+      #tela-login {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .card-login {
+        background: var(--bg-card);
+        padding: 32px;
+        border-radius: var(--raio);
+        width: 320px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      .card-login img{
+        width: 60px;
+        margin: auto;
+        display: flex;
+      }
+      .card-login h1 {
+        font-size: 20px;
+        margin-bottom: 4px;
+        text-align: center;
+      }
+      .card-login p {
+        color: var(--texto-suave);
+        font-size: 13px;
+        margin-top: 0;
+      }
+      .campo {
+        margin-bottom: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .campo label {
+        font-size: 13px;
+        color: var(--texto-suave);
+      }
+      .checkbox-linha {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--texto-suave);
+      }
+      .erro-msg {
+        color: var(--cor-perigo);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+
+      /* ---------- SHELL ---------- */
+      #app-shell {
+        display: none;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--borda);
+      }
+      .saudacao {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      header h1 {
+        font-size: 18px;
+        margin: 0;
+      }
+      .saudacao img {
+        width: 50px;
+      }
+      nav {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      nav button.ativo {
+        background: var(--cor-primaria);
+        color: #fff;
+      }
+      main {
+        padding: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* ---------- FILTROS ---------- */
+      .barra-filtros {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        align-items: center;
+      }
+      .barra-filtros input[type="text"] {
+        flex: 1;
+        min-width: 180px;
+      }
+
+      /* ---------- CARDS DE PALAVRAS ---------- */
+      .lista-palavras {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .card-palavra {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: var(--raio);
+        padding: 14px 16px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .card-palavra .emoji {
+        font-size: 12px;
+        margin-left: 5px;
+        color: var(--texto-suave);
+      }
+      .card-palavra .conteudo {
+        flex: 1;
+        min-width: 0;
+      }
+      .card-palavra .titulo {
+        font-weight: 600;
+        font-size: 16px;
+      }
+      .card-palavra .meta {
+        font-size: 12px;
+        color: var(--texto-suave);
+        margin-bottom: 4px;
+      }
+      .card-palavra .significado,
+      .card-palavra .obs {
+        font-size: 13px;
+        color: var(--texto-suave);
+        font-style: italic;
+        text-transform: lowercase;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .card-palavra .obs {
+        color: var(--texto-suave);
+        font-size: 13px;
+        margin-top: 4px;
+      }
+      .card-palavra .acoes {
+        display: flex;
+        gap: 6px;
+      }
+      .card-palavra .acoes button {
+        padding: 6px 10px;
+        font-size: 13px;
+        border: 1px solid var(--texto-suave);
+        background-color: var(--bg-card);
+      }
+      .acoes button.btn-detalhes {
+        color: var(--cor-aviso);
+        border-color: var(--cor-aviso);
+      }
+      .acoes button.btn-editar {
+        color: var(--cor-sucesso);
+        border-color: var(--cor-sucesso);
+      }
+      .acoes button.btn-excluir {
+        color: var(--cor-perigo);
+        border-color: var(--cor-perigo);
+      }
+
+      /* ---------- PAGINAÇÃO ---------- */
+      .paginacao {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 16px;
+        align-items: center;
+      }
+
+      /* ---------- MODAL ---------- */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      .modal {
+        background: var(--bg-card);
+        border-radius: var(--raio);
+        padding: 24px;
+        width: 90%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal h2 {
+        margin-top: 0;
+        font-size: 18px;
+      }
+      .modal-acoes {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .aviso-duplicada {
+        background: rgba(243, 156, 18, 0.15);
+        border: 1px solid var(--cor-aviso);
+        border-radius: var(--raio);
+        padding: 12px;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
+      /* ---------- FLASHCARDS ---------- */
+      .flash-config {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 400px;
+      }
+      .flash-idiomas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .flash-idiomas label {
+        border: 1px solid var(--borda);
+        border-radius: var(--raio);
+        padding: 6px 10px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .palco-flashcard {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      .cartao {
+        width: 100%;
+        max-width: 420px;
+        height: 240px;
+        perspective: 1000px;
+        cursor: pointer;
+      }
+      .cartao-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s;
+        transform-style: preserve-3d;
+      }
+      .cartao.virado .cartao-inner {
+        transform: rotateY(180deg);
+      }
+      .face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        border-radius: var(--raio);
+        border: 1px solid var(--borda);
+        background: var(--bg-card);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+      }
+      .face-verso {
+        transform: rotateY(180deg);
+      }
+      .face .idioma-tag {
+        font-size: 13px;
+        color: var(--texto-suave);
+        margin-bottom: 8px;
+      }
+      .face .palavra-grande {
+        font-size: 26px;
+        font-weight: 700;
+      }
+      .face .significado-grande {
+        font-size: 16px;
+      }
+      .face .obs-grande {
+        font-size: 13px;
+        color: var(--texto-suave);
+        margin-top: 8px;
+      }
+      .flash-acoes {
+        display: flex;
+        gap: 12px;
+      }
+      .flash-progresso {
+        font-size: 13px;
+        color: var(--texto-suave);
+      }
+
+      /* ---------- TABELAS (log / lixeira / admin) ---------- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--borda);
+      }
+      th {
+        color: var(--texto-suave);
+        font-weight: 600;
+      }
+
+      /* ---------- LOADING ---------- */
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid var(--borda);
+        border-top-color: var(--cor-primaria);
+        border-radius: 50%;
+        display: inline-block;
+        animation: girar 0.7s linear infinite;
+        vertical-align: middle;
+      }
+      .spinner-grande {
+        width: 32px;
+        height: 32px;
+        border-width: 4px;
+      }
+      @keyframes girar {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .carregando-linha {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 30px;
+        color: var(--texto-suave);
+        font-size: 14px;
+      }
+      #overlay-boot {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        z-index: 200;
+        color: var(--texto-suave);
+        font-size: 14px;
+      }
+
+      /* ---------- ANÁLISES ---------- */
+      .analytics-periodo {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .analytics-periodo button.ativo {
+        background: var(--cor-primaria);
+        color: #fff;
+      }
+      .analytics-nav-periodo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        font-size: 13px;
+        color: var(--texto-suave);
+      }
+      .analytics-resumo {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 700px) {
+        .analytics-resumo {
+          grid-template-columns: 1fr;
+        }
+      }
+      .analytics-resumo-card {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: var(--raio);
+        padding: 20px;
+        text-align: center;
+      }
+      .analytics-resumo-numero {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--cor-primaria);
+      }
+      .analytics-resumo-label {
+        font-size: 13px;
+        color: var(--texto-suave);
+        margin-top: 4px;
+      }
+      .analytics-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .analytics-card {
+        background: var(--bg-card);
+        border: 1px solid var(--borda);
+        border-radius: var(--raio);
+        padding: 14px 16px;
+      }
+      .analytics-card-topo {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .analytics-barra {
+        height: 8px;
+        background: var(--borda);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .analytics-barra-preenchida {
+        height: 100%;
+        background: var(--cor-primaria);
+        border-radius: 4px;
+      }
+      .analytics-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .analytics-chip {
+        font-size: 12px;
+        color: var(--texto-suave);
+        background: var(--bg);
+        border: 1px solid var(--borda);
+        border-radius: 20px;
+        padding: 3px 10px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 700px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        header {
+          flex-direction: column;
+          gap: 10px;
+        }
+        header nav {
+          justify-content: center;
+        }
+        .saudacao{
+          gap: 8px;
+        }
+        .saudacao img {
+          width: 35px;
+        }
+        .card-palavra button{
+          padding: 3px 6px !important;
+        }
+        .card-palavra .significado{
+          padding-top: 10px;
+        }
+      }
+    </style>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+  <body>
+    <!-- ===================== OVERLAY DE CARREGAMENTO INICIAL ===================== -->
+    <div id="overlay-boot">
+      <div class="spinner spinner-grande"></div>
+      <p id="overlay-boot-texto">Carregando seu dicionário...</p>
+    </div>
+
+    <!-- ===================== LOGIN ===================== -->
+    <div id="tela-login" style="display: none">
+      <form class="card-login" id="form-login">
+        <img src="logo.png" alt="logo-dicional">
+        <h1>Dicional</h1>
+        <div class="campo">
+          <label>Usuário</label>
+          <input
+            type="text"
+            id="input-usuario"
+            required
+            autocomplete="username"
+          />
+        </div>
+        <div class="campo">
+          <label>Senha</label>
+          <input
+            type="password"
+            id="input-senha"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+        <div class="checkbox-linha">
+          <input type="checkbox" id="input-lembrar" />
+          <label for="input-lembrar">Lembrar meus dados neste navegador</label>
+        </div>
+        <button
+          type="submit"
+          class="btn-primario"
+          style="width: 100%; margin-top: 10px"
+        >
+          Entrar
+        </button>
+        <div class="erro-msg oculto" id="login-erro"></div>
+      </form>
+    </div>
+
+    <!-- ===================== APP ===================== -->
+    <div id="app-shell">
+      <header>
+        <div class="saudacao">
+          <img src="logo.png" alt="logo-dicional" />
+          <h1 id="saudacao">Dicional</h1>
+        </div>
+        <nav id="menu-nav">
+          <button data-view="consulta" class="btn-neutro">
+            <i class="fa fa-search"></i>
+          </button>
+          <button data-view="flashcards" class="btn-neutro">
+            <i class="fa fa-lightbulb-o"></i>
+          </button>
+          <button data-view="analytics" class="btn-neutro">
+            <i class="fa fa-bar-chart"></i>
+          </button>
+          <button
+            data-view="duplicadas"
+            class="btn-neutro oculto"
+            id="nav-duplicadas"
+          >
+            <i class="fa fa-clone"></i>
+          </button>
+          <button
+            data-view="lixeira"
+            class="btn-neutro oculto"
+            id="nav-lixeira"
+          >
+            <i class="fa fa-trash-o"></i>
+          </button>
+          <button data-view="admin" class="btn-neutro oculto" id="nav-admin">
+            <i class="fa fa-gear"></i>
+          </button>
+          <button id="btn-tema" class="btn-neutro">
+            <i class="fa fa-adjust"></i>
+          </button>
+          <button id="btn-sair" class="btn-neutro">
+            <i class="fa fa-sign-out"></i>
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        <!-- ---------- VIEW: CONSULTA ---------- -->
+        <section id="view-consulta">
+          <div class="barra-filtros">
+            <input
+              type="text"
+              id="filtro-busca"
+              placeholder="Buscar palavra ou significado..."
+            />
+            <select id="filtro-idioma">
+              <option value="todos">Todos os idiomas</option>
+            </select>
+            <select id="filtro-usuario">
+              <option value="todos">Todos os usuários</option>
+            </select>
+            <select id="filtro-ordenacao">
+              <option value="recentes">Mais recentes</option>
+              <option value="antigas">Mais antigas</option>
+              <option value="az">A-Z</option>
+              <option value="za">Z-A</option>
+            </select>
+            <button class="btn-primario" id="btn-nova-palavra">
+              <i class="fa fa-plus"></i>
+            </button>
+          </div>
+          <div class="lista-palavras" id="lista-palavras"></div>
+          <div class="paginacao" id="paginacao"></div>
+        </section>
+
+        <!-- ---------- VIEW: FLASHCARDS ---------- -->
+        <section id="view-flashcards" class="oculto">
+          <div id="flash-config-area" class="flash-config">
+            <h2>Flashcards</h2>
+            <div>
+              <label style="font-size: 13px; color: var(--texto-suave)"
+                >Idiomas pra treinar</label
+              >
+              <div class="flash-idiomas" id="flash-idiomas-checkboxes"></div>
+            </div>
+            <div class="campo">
+              <label>Quantidade de cartas</label>
+              <input
+                type="number"
+                id="flash-quantidade"
+                value="15"
+                min="1"
+                max="50"
+              />
+            </div>
+            <button class="btn-primario" id="btn-iniciar-flash">
+              Iniciar sessão
+            </button>
+          </div>
+
+          <div id="flash-palco-area" class="palco-flashcard oculto">
+            <div class="flash-progresso" id="flash-progresso"></div>
+            <div class="cartao" id="cartao-flash">
+              <div class="cartao-inner">
+                <div class="face face-frente">
+                  <div class="idioma-tag" id="fc-idioma-frente"></div>
+                  <div class="palavra-grande" id="fc-palavra"></div>
+                  <div class="obs-grande" style="margin-top: 16px">
+                    (clique para virar)
+                  </div>
+                </div>
+                <div class="face face-verso">
+                  <div class="idioma-tag" id="fc-idioma-verso"></div>
+                  <div class="significado-grande" id="fc-significado"></div>
+                  <div class="obs-grande" id="fc-obs"></div>
+                </div>
+              </div>
+            </div>
+            <div class="flash-acoes">
+              <button class="btn-perigo" id="btn-nao-lembrei">
+                😵 Não lembrei
+              </button>
+              <button
+                class="btn-sucesso"
+                style="background: var(--cor-sucesso); color: #fff"
+                id="btn-lembrei"
+              >
+                ✅ Lembrei
+              </button>
+            </div>
+            <button class="btn-neutro" id="btn-encerrar-flash">
+              Encerrar sessão
+            </button>
+          </div>
+
+          <div id="flash-fim-area" class="oculto" style="text-align: center">
+            <h2>Sessão concluída! 🎉</h2>
+            <p>Mandou bem. Volte quando quiser treinar mais.</p>
+            <button class="btn-primario" id="btn-nova-sessao">
+              Nova sessão
+            </button>
+          </div>
+        </section>
+
+        <!-- ---------- VIEW: LOG DE DUPLICADAS ---------- -->
+        <section id="view-duplicadas" class="oculto">
+          <h2>Tentativas de cadastro duplicado</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Palavra</th>
+                <th>Idioma</th>
+                <th>Data</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-duplicadas"></tbody>
+          </table>
+        </section>
+
+        <!-- ---------- VIEW: LIXEIRA ---------- -->
+        <section id="view-lixeira" class="oculto">
+          <h2>Palavras excluídas</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Palavra</th>
+                <th>Idioma</th>
+                <th>Data</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-lixeira"></tbody>
+          </table>
+        </section>
+
+        <!-- ---------- VIEW: ADMIN ---------- -->
+        <section id="view-admin" class="oculto">
+          <div class="grid-2">
+            <div>
+              <h2>Usuários</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Papel</th>
+                    <th>Leitura</th>
+                    <th>Edição</th>
+                    <th>Ativo</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-usuarios"></tbody>
+              </table>
+              <button
+                class="btn-primario"
+                id="btn-novo-usuario"
+                style="margin-top: 10px"
+              >
+                + Novo usuário
+              </button>
+            </div>
+            <div>
+              <h2>Idiomas</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Emoji</th>
+                    <th>Nome</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-idiomas"></tbody>
+              </table>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <input
+                  type="text"
+                  id="novo-idioma-emoji"
+                  placeholder="🇺🇸"
+                  style="width: 70px"
+                />
+                <input
+                  type="text"
+                  id="novo-idioma-nome"
+                  placeholder="Nome do idioma"
+                  style="flex: 1"
+                />
+                <button class="btn-primario" id="btn-novo-idioma">
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- VIEW: ANÁLISES ---------- -->
+        <section id="view-analytics" class="oculto">
+          <div class="analytics-periodo">
+            <button class="btn-neutro" data-periodo="hoje">Hoje</button>
+            <button class="btn-neutro" data-periodo="semana">
+              Esta semana
+            </button>
+            <button class="btn-neutro ativo" data-periodo="mes">
+              Este mês
+            </button>
+            <button class="btn-neutro" data-periodo="personalizado">
+              Personalizado
+            </button>
+            <div class="analytics-nav-periodo" id="analytics-nav-periodo">
+              <button class="btn-neutro" id="analytics-anterior">
+                <i class="fa fa-angle-left"></i>
+              </button>
+              <span id="analytics-periodo-label"></span>
+              <button class="btn-neutro" id="analytics-proximo">
+                <i class="fa fa-angle-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="barra-filtros oculto" id="analytics-personalizado-area">
+            <label style="font-size: 13px; color: var(--texto-suave)">De</label>
+            <input type="date" id="analytics-data-inicio" />
+            <label style="font-size: 13px; color: var(--texto-suave)"
+              >Até</label
+            >
+            <input type="date" id="analytics-data-fim" />
+            <button class="btn-primario" id="analytics-aplicar-personalizado">
+              Aplicar
+            </button>
+          </div>
+          <div id="analytics-conteudo"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===================== MODAL CADASTRO/EDIÇÃO ===================== -->
+    <div class="overlay oculto" id="modal-palavra">
+      <div class="modal">
+        <h2 id="modal-palavra-titulo">Nova palavra</h2>
+        <div id="aviso-duplicada-area" class="aviso-duplicada oculto"></div>
+        <div class="campo">
+          <label>Idioma *</label>
+          <select id="form-idioma"></select>
+        </div>
+        <div class="campo">
+          <label>Palavra *</label>
+          <input type="text" id="form-palavra" />
+        </div>
+        <div class="campo">
+          <label>Significado *</label>
+          <textarea id="form-significado" rows="3"></textarea>
+        </div>
+        <div class="campo">
+          <label>Observação (opcional)</label>
+          <textarea id="form-observacao" rows="2"></textarea>
+        </div>
+        <div class="erro-msg oculto" id="modal-erro"></div>
+        <div class="modal-acoes">
+          <button class="btn-perigo oculto" id="btn-excluir-do-modal">
+            Excluir
+          </button>
+          <button class="btn-neutro" id="btn-cancelar-palavra">Cancelar</button>
+          <button class="btn-primario" id="btn-salvar-palavra">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL DETALHES ===================== -->
+    <div class="overlay oculto" id="modal-detalhes">
+      <div class="modal">
+        <h2 id="detalhes-titulo"></h2>
+        <p
+          style="font-size: 13px; color: var(--texto-suave)"
+          id="detalhes-meta"
+        ></p>
+        <p id="detalhes-significado"></p>
+        <p style="color: var(--texto-suave)" id="detalhes-obs"></p>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-fechar-detalhes">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL EXCLUSÃO ===================== -->
+    <div class="overlay oculto" id="modal-exclusao">
+      <div class="modal">
+        <h2>Excluir palavra</h2>
+        <p style="font-size: 13px; color: var(--texto-suave)">
+          Essa palavra vai para a lixeira. Informe o motivo:
+        </p>
+        <textarea
+          id="motivo-exclusao"
+          rows="3"
+          style="width: 100%"
+          placeholder="Ex: cadastro errado, palavra duplicada não sinalizada, etc."
+        ></textarea>
+        <div class="erro-msg oculto" id="exclusao-erro"></div>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-cancelar-exclusao">
+            Cancelar
+          </button>
+          <button class="btn-perigo" id="btn-confirmar-exclusao">
+            Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL DETALHES DUPLICADA ===================== -->
+    <div class="overlay oculto" id="modal-detalhes-duplicada">
+      <div class="modal">
+        <h2 id="detalhes-duplicada-titulo"></h2>
+        <div class="campo">
+          <label>Quem tentou</label>
+          <p id="detalhes-duplicada-tentou"></p>
+        </div>
+        <div class="campo">
+          <label>Já cadastrada por</label>
+          <p id="detalhes-duplicada-original"></p>
+        </div>
+        <div class="campo">
+          <label>Data da tentativa</label>
+          <p id="detalhes-duplicada-data"></p>
+        </div>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-fechar-detalhes-duplicada">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL DETALHES LIXEIRA ===================== -->
+    <div class="overlay oculto" id="modal-detalhes-lixeira">
+      <div class="modal">
+        <h2 id="detalhes-lixeira-titulo"></h2>
+        <div class="campo">
+          <label>Cadastrada por</label>
+          <p id="detalhes-lixeira-cadastrou"></p>
+        </div>
+        <div class="campo">
+          <label>Excluída por</label>
+          <p id="detalhes-lixeira-excluiu"></p>
+        </div>
+        <div class="campo">
+          <label>Data da exclusão</label>
+          <p id="detalhes-lixeira-data"></p>
+        </div>
+        <div class="campo">
+          <label>Motivo</label>
+          <p id="detalhes-lixeira-motivo"></p>
+        </div>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-fechar-detalhes-lixeira">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL NOVO USUÁRIO ===================== -->
+    <div class="overlay oculto" id="modal-usuario">
+      <div class="modal">
+        <h2>Novo usuário</h2>
+        <div class="campo">
+          <label>Nome</label><input type="text" id="nu-nome" />
+        </div>
+        <div class="campo">
+          <label>Login</label><input type="text" id="nu-login" />
+        </div>
+        <div class="campo">
+          <label>Senha</label><input type="password" id="nu-senha" />
+        </div>
+        <div class="campo">
+          <label>Papel</label>
+          <select id="nu-papel">
+            <option value="membro">Membro</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Permissão de leitura</label>
+          <select id="nu-leitura">
+            <option value="total">Total</option>
+            <option value="parcial">Parcial</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Idiomas de leitura (se parcial, separados por vírgula)</label
+          ><input
+            type="text"
+            id="nu-idiomas-leitura"
+            placeholder="Inglês, Francês"
+          />
+        </div>
+        <div class="campo">
+          <label>Permissão de edição</label>
+          <select id="nu-edicao">
+            <option value="parcial">Parcial (só as próprias)</option>
+            <option value="total">Total (todas)</option>
+            <option value="nenhuma">Nenhuma</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Idiomas de edição (deixe vazio pra todos)</label
+          ><input
+            type="text"
+            id="nu-idiomas-edicao"
+            placeholder="Inglês, Francês"
+          />
+        </div>
+        <div class="erro-msg oculto" id="nu-erro"></div>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-cancelar-usuario">Cancelar</button>
+          <button class="btn-primario" id="btn-salvar-usuario">Criar</button>
+        </div>
+      </div>
+    </div>
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      /* ======================= CONFIG ======================= */
+      const CONFIG = {
+        API_URL:
+          "https://script.google.com/macros/s/AKfycbzhZbj9pnF8-ZHONmG7QrQ5m0TNPnNgsIYjSasfhNy3xnwLPcQgqmF9biq3F1wsZrby/exec", // veja INSTRUCOES.md
+      };
+
+      /* ======================= ESTADO ======================= */
+      let sessao = null; // { id, nome, papel, permissao_leitura, ... }
+      let idiomasCache = [];
+      let usuariosCache = [];
+      let paginaAtual = 1;
+      const TAMANHO_PAGINA = 8;
+      let palavraEmEdicao = null; // id da palavra sendo editada (null = criando)
+      let palavraParaExcluir = null;
+      let flashcardsFila = [];
+      let flashcardIndice = 0;
+      let analyticsModo = "mes"; // hoje | semana | mes | personalizado
+      let analyticsReferencia = new Date();
+
+      /* ======================= COMUNICAÇÃO COM APPS SCRIPT ======================= */
+      async function chamarApi(payload) {
+        const resp = await fetch(CONFIG.API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        return resp.json();
+      }
+
+      /* ======================= LOADING (HELPERS) ======================= */
+      function mostrarOverlayBoot(mostrar, mensagem) {
+        const overlay = document.getElementById("overlay-boot");
+        if (mensagem)
+          document.getElementById("overlay-boot-texto").textContent = mensagem;
+        overlay.style.display = mostrar ? "flex" : "none";
+      }
+
+      // Deixa um botão em estado "carregando" (desabilitado + spinner) e
+      // guarda o texto original pra restaurar depois com definirBotaoCarregando(btn, false).
+      function definirBotaoCarregando(botao, carregando, textoCarregando) {
+        if (!botao) return;
+        if (carregando) {
+          if (botao.dataset.textoOriginal === undefined) {
+            botao.dataset.textoOriginal = botao.innerHTML;
+          }
+          botao.disabled = true;
+          botao.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> ${textoCarregando || "Aguarde..."}`;
+        } else {
+          botao.disabled = false;
+          if (botao.dataset.textoOriginal !== undefined) {
+            botao.innerHTML = botao.dataset.textoOriginal;
+          }
+        }
+      }
+
+      // HTML de uma linha de "carregando..." pra usar dentro de listas/tabelas
+      function linhaCarregando(mensagem) {
+        return `<div class="carregando-linha"><span class="spinner"></span> ${mensagem || "Carregando..."}</div>`;
+      }
+
+      /* ======================= TEMA ======================= */
+      function aplicarTema(tema) {
+        document.documentElement.setAttribute("data-tema", tema);
+        localStorage.setItem("tema_local", tema);
+      }
+      document.getElementById("btn-tema").onclick = async () => {
+        const atual = document.documentElement.getAttribute("data-tema");
+        const novo = atual === "dark" ? "light" : "dark";
+        aplicarTema(novo);
+        if (sessao)
+          await chamarApi({
+            action: "salvarPreferencias",
+            usuario_id: sessao.id,
+            tema_preferido: novo,
+          });
+      };
+      aplicarTema(localStorage.getItem("tema_local") || "light");
+
+      /* ======================= LOGIN ======================= */
+      document
+        .getElementById("form-login")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const usuario = document.getElementById("input-usuario").value.trim();
+          const senha = document.getElementById("input-senha").value;
+          const lembrar = document.getElementById("input-lembrar").checked;
+          const erroEl = document.getElementById("login-erro");
+          erroEl.classList.add("oculto");
+          const btnEntrar = document.querySelector(
+            '#form-login button[type="submit"]',
+          );
+          definirBotaoCarregando(btnEntrar, true, "Entrando...");
+
+          const resp = await chamarApi({ action: "login", usuario, senha });
+          if (!resp.sucesso) {
+            definirBotaoCarregando(btnEntrar, false);
+            erroEl.textContent = resp.erro;
+            erroEl.classList.remove("oculto");
+            return;
+          }
+          sessao = resp.usuario;
+          if (lembrar) {
+            localStorage.setItem(
+              "credenciais",
+              JSON.stringify({ usuario, senha }),
+            );
+          } else {
+            localStorage.removeItem("credenciais");
+          }
+          await iniciarApp();
+        });
+
+      async function tentarAutoLogin() {
+        const salvo = localStorage.getItem("credenciais");
+        if (!salvo) return false;
+        const { usuario, senha } = JSON.parse(salvo);
+        const resp = await chamarApi({ action: "login", usuario, senha });
+        if (resp.sucesso) {
+          sessao = resp.usuario;
+          await iniciarApp();
+          return true;
+        }
+        return false;
+      }
+
+      document.getElementById("btn-sair").onclick = () => {
+        sessao = null;
+        document.getElementById("app-shell").style.display = "none";
+        document.getElementById("tela-login").style.display = "flex";
+      };
+
+      /* ======================= INÍCIO DO APP ======================= */
+      async function iniciarApp() {
+        document.getElementById("tela-login").style.display = "none";
+        mostrarOverlayBoot(true, "Preparando seu dicionário...");
+        document.getElementById("app-shell").style.display = "flex";
+        // document.getElementById("saudacao").textContent = "Olá, " + sessao.nome;
+        aplicarTema(sessao.tema_preferido || "light");
+
+        document
+          .getElementById("nav-duplicadas")
+          .classList.toggle(
+            "oculto",
+            !(sessao.papel === "admin" || sessao.permissao_leitura === "total"),
+          );
+        document
+          .getElementById("nav-lixeira")
+          .classList.toggle("oculto", sessao.papel !== "admin");
+        document
+          .getElementById("nav-admin")
+          .classList.toggle("oculto", sessao.papel !== "admin");
+
+        const respIdiomas = await chamarApi({ action: "listarIdiomas" });
+        idiomasCache = respIdiomas.idiomas || [];
+        preencherSelectsIdioma();
+
+        const respUsuarios = await chamarApi({
+          action: "listarUsuarios",
+          usuario_id_solicitante: sessao.id,
+        });
+        usuariosCache = respUsuarios.usuarios || [];
+        preencherSelectUsuario();
+
+        mudarView("consulta");
+        await carregarPalavras();
+        mostrarOverlayBoot(false);
+      }
+
+      function preencherSelectsIdioma() {
+        const opcoes = idiomasCache
+          .map((i) => `<option value="${i.id}">${i.nome}</option>`)
+          .join("");
+        document.getElementById("filtro-idioma").innerHTML =
+          '<option value="todos">Todos os idiomas</option>' + opcoes;
+        document.getElementById("form-idioma").innerHTML = opcoes;
+        document.getElementById("flash-idiomas-checkboxes").innerHTML =
+          idiomasCache
+            .map(
+              (i) =>
+                `<label><input type="checkbox" value="${i.id}" checked>${i.nome}</label>`,
+            )
+            .join("");
+      }
+
+      function preencherSelectUsuario() {
+        const opcoes = usuariosCache
+          .map((u) => `<option value="${u.id}">${u.nome}</option>`)
+          .join("");
+        document.getElementById("filtro-usuario").innerHTML =
+          '<option value="todos">Todos os usuários</option>' + opcoes;
+      }
+
+      /* ======================= NAVEGAÇÃO ======================= */
+      document.getElementById("menu-nav").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-view]");
+        if (!btn) return;
+        mudarView(btn.dataset.view);
+      });
+
+      async function mudarView(nome) {
+        [
+          "consulta",
+          "flashcards",
+          "analytics",
+          "duplicadas",
+          "lixeira",
+          "admin",
+        ].forEach((v) => {
+          document
+            .getElementById("view-" + v)
+            .classList.toggle("oculto", v !== nome);
+        });
+        document
+          .querySelectorAll("#menu-nav button[data-view]")
+          .forEach((b) => {
+            b.classList.toggle("ativo", b.dataset.view === nome);
+          });
+        if (nome === "analytics") await carregarAnalytics();
+        if (nome === "duplicadas") await carregarDuplicadas();
+        if (nome === "lixeira") await carregarLixeira();
+        if (nome === "admin") await carregarAdmin();
+      }
+
+      /* ======================= CONSULTA DE PALAVRAS ======================= */
+      [
+        "filtro-busca",
+        "filtro-idioma",
+        "filtro-usuario",
+        "filtro-ordenacao",
+      ].forEach((id) => {
+        document.getElementById(id).addEventListener("input", () => {
+          paginaAtual = 1;
+          carregarPalavras();
+        });
+      });
+
+      async function carregarPalavras() {
+        document.getElementById("lista-palavras").innerHTML = linhaCarregando(
+          "Carregando palavras...",
+        );
+        document.getElementById("paginacao").innerHTML = "";
+        const resp = await chamarApi({
+          action: "listarPalavras",
+          usuario_id_solicitante: sessao.id,
+          busca: document.getElementById("filtro-busca").value,
+          idioma_id: document.getElementById("filtro-idioma").value,
+          filtro_usuario_id: document.getElementById("filtro-usuario").value,
+          ordenacao: document.getElementById("filtro-ordenacao").value,
+          pagina: paginaAtual,
+          tamanho_pagina: TAMANHO_PAGINA,
+        });
+        if (!resp.sucesso) return;
+
+        const lista = document.getElementById("lista-palavras");
+        if (!resp.palavras.length) {
+          lista.innerHTML =
+            '<p style="color:var(--texto-suave)">Nenhuma palavra encontrada.</p>';
+        } else {
+          lista.innerHTML = resp.palavras
+            .map(
+              (p) => `
+      <div class="card-palavra" data-id="${p.id}">
+        <div class="conteudo">
+          <div class="titulo">${escapeHtml(p.palavra)} <span class="emoji">(${p.idioma_emoji})</span></div>
+          
+          <div class="significado">${escapeHtml(p.significado)}</div>
+          
+        </div>
+        <div class="acoes">
+          <button class="btn-neutro btn-detalhes"><i class="fa fa-info-circle"></i></button>
+          ${
+            p.pode_editar
+              ? `<button class="btn-neutro btn-editar"><i class="fa fa-edit"></i>
+</button>`
+              : ""
+          }
+        </div>
+      </div>
+    `,
+            )
+            .join("");
+        }
+        // <div class="meta">${escapeHtml(p.usuario_nome)} · ${formatarData(p.data_criacao)}</div>
+        //  ${p.observacao ? `<div class="obs">${escapeHtml(p.observacao)}</div>` : ""}
+
+        const totalPaginas = Math.max(
+          1,
+          Math.ceil(resp.total / TAMANHO_PAGINA),
+        );
+        document.getElementById("paginacao").innerHTML = `
+    <button class="btn-neutro" id="pag-anterior" ${paginaAtual <= 1 ? "disabled" : ""}><i class="fa fa-angle-left"></i>
+</button>
+    <span>${paginaAtual} de ${totalPaginas}</span>
+    <button class="btn-neutro" id="pag-proxima" ${paginaAtual >= totalPaginas ? "disabled" : ""}><i class="fa fa-angle-right"></i>
+</button>
+  `;
+        document.getElementById("pag-anterior").onclick = () => {
+          paginaAtual--;
+          carregarPalavras();
+        };
+        document.getElementById("pag-proxima").onclick = () => {
+          paginaAtual++;
+          carregarPalavras();
+        };
+
+        // dados completos guardados para os modais
+        window._palavrasAtuais = resp.palavras;
+      }
+
+      document
+        .getElementById("lista-palavras")
+        .addEventListener("click", (e) => {
+          const card = e.target.closest(".card-palavra");
+          if (!card) return;
+          const id = card.dataset.id;
+          const palavra = window._palavrasAtuais.find(
+            (p) => String(p.id) === String(id),
+          );
+          if (e.target.closest(".btn-detalhes")) abrirDetalhes(palavra);
+          if (e.target.closest(".btn-editar")) abrirModalPalavra(palavra);
+          // if (e.target.closest(".btn-excluir")) abrirModalExclusao(palavra);
+        });
+
+      function abrirDetalhes(p) {
+        document.getElementById("detalhes-titulo").textContent =
+          p.idioma_emoji + " " + p.palavra;
+        document.getElementById("detalhes-meta").textContent =
+          "Cadastrado por " +
+          p.usuario_nome +
+          " em " +
+          formatarData(p.data_criacao);
+        document.getElementById("detalhes-significado").textContent =
+          p.significado;
+        document.getElementById("detalhes-obs").textContent =
+          p.observacao || "";
+        document.getElementById("modal-detalhes").classList.remove("oculto");
+      }
+      document.getElementById("btn-fechar-detalhes").onclick = () =>
+        document.getElementById("modal-detalhes").classList.add("oculto");
+
+      function abrirDetalhesDuplicada(l) {
+        document.getElementById("detalhes-duplicada-titulo").textContent =
+          l.idioma_emoji + " " + l.palavra_tentada;
+        document.getElementById("detalhes-duplicada-tentou").textContent =
+          l.usuario_tentativa_nome;
+        document.getElementById("detalhes-duplicada-original").textContent =
+          l.usuario_original_nome;
+        document.getElementById("detalhes-duplicada-data").textContent =
+          formatarData(l.data_tentativa);
+        document
+          .getElementById("modal-detalhes-duplicada")
+          .classList.remove("oculto");
+      }
+      document.getElementById("btn-fechar-detalhes-duplicada").onclick = () =>
+        document
+          .getElementById("modal-detalhes-duplicada")
+          .classList.add("oculto");
+
+      function abrirDetalhesLixeira(l) {
+        document.getElementById("detalhes-lixeira-titulo").textContent =
+          l.idioma_emoji + " " + l.palavra;
+        document.getElementById("detalhes-lixeira-cadastrou").textContent =
+          l.usuario_nome;
+        document.getElementById("detalhes-lixeira-excluiu").textContent =
+          l.excluido_por_nome;
+        document.getElementById("detalhes-lixeira-data").textContent =
+          formatarData(l.data_exclusao);
+        document.getElementById("detalhes-lixeira-motivo").textContent =
+          l.motivo_exclusao || "—";
+        document
+          .getElementById("modal-detalhes-lixeira")
+          .classList.remove("oculto");
+      }
+      document.getElementById("btn-fechar-detalhes-lixeira").onclick = () =>
+        document
+          .getElementById("modal-detalhes-lixeira")
+          .classList.add("oculto");
+
+      /* ---------- MODAL CADASTRO/EDIÇÃO ---------- */
+      document.getElementById("btn-nova-palavra").onclick = () =>
+        abrirModalPalavra(null);
+
+      function abrirModalPalavra(palavra) {
+        palavraEmEdicao = palavra ? palavra.id : null;
+        document.getElementById("modal-palavra-titulo").textContent = palavra
+          ? "Editar palavra"
+          : "Nova palavra";
+        document.getElementById("form-idioma").value = palavra
+          ? palavra.idioma_id
+          : idiomasCache[0]
+            ? idiomasCache[0].id
+            : "";
+        document.getElementById("form-idioma").disabled = false; //  muda idioma na edição
+        document.getElementById("form-palavra").value = palavra
+          ? palavra.palavra
+          : "";
+        document.getElementById("form-palavra").disabled = false; //  muda a palavra na edição (além de significado/obs)
+        document.getElementById("form-significado").value = palavra
+          ? palavra.significado
+          : "";
+        document.getElementById("form-observacao").value = palavra
+          ? palavra.observacao
+          : "";
+        document.getElementById("aviso-duplicada-area").classList.add("oculto");
+        document.getElementById("modal-erro").classList.add("oculto");
+        document.getElementById("btn-salvar-palavra").onclick =
+          salvarPalavraHandlerPadrao;
+        document
+          .getElementById("btn-excluir-do-modal")
+          .classList.toggle("oculto", !palavra);
+        document.getElementById("modal-palavra").classList.remove("oculto");
+      }
+      document.getElementById("btn-excluir-do-modal").onclick = () => {
+        document.getElementById("modal-palavra").classList.add("oculto");
+        abrirModalExclusao({ id: palavraEmEdicao });
+      };
+      document.getElementById("btn-cancelar-palavra").onclick = () =>
+        document.getElementById("modal-palavra").classList.add("oculto");
+
+      async function salvarPalavraHandlerPadrao() {
+        const erroEl = document.getElementById("modal-erro");
+        erroEl.classList.add("oculto");
+        const palavraTexto = document
+          .getElementById("form-palavra")
+          .value.trim();
+        const significado = document
+          .getElementById("form-significado")
+          .value.trim();
+        const observacao = document
+          .getElementById("form-observacao")
+          .value.trim();
+        const idioma_id = document.getElementById("form-idioma").value;
+
+        if (!palavraTexto || !significado) {
+          erroEl.textContent = "Palavra e significado são obrigatórios.";
+          erroEl.classList.remove("oculto");
+          return;
+        }
+
+        definirBotaoCarregando(
+          document.getElementById("btn-salvar-palavra"),
+          true,
+          "Salvando...",
+        );
+
+        const payload = palavraEmEdicao
+          ? {
+              action: "editarPalavra",
+              usuario_id: sessao.id,
+              palavra_id: palavraEmEdicao,
+              palavra: palavraTexto,
+              idioma_id,
+              significado,
+              observacao,
+            }
+          : {
+              action: "criarPalavra",
+              usuario_id: sessao.id,
+              palavra: palavraTexto,
+              significado,
+              observacao,
+              idioma_id,
+            };
+
+        const resp = await chamarApi(payload);
+        definirBotaoCarregando(
+          document.getElementById("btn-salvar-palavra"),
+          false,
+        );
+
+        if (!resp.sucesso && resp.duplicada) {
+          const ex = resp.palavra_existente;
+          document.getElementById("aviso-duplicada-area").innerHTML = `
+      ⚠️ ${resp.mensagem}<br>Cadastrada por <b>${escapeHtml(ex.usuario_nome)}</b> em ${formatarData(ex.data_criacao)}.
+      <div class="checkbox-linha" style="margin-top:8px;">
+        <input type="checkbox" id="check-sinalizar-duplicada">
+        <label for="check-sinalizar-duplicada">Ok, vou registrar essa tentativa mesmo assim</label>
+      </div>
+    `;
+          document
+            .getElementById("aviso-duplicada-area")
+            .classList.remove("oculto");
+
+          document.getElementById("btn-salvar-palavra").onclick = async () => {
+            const marcado = document.getElementById(
+              "check-sinalizar-duplicada",
+            )?.checked;
+            if (!marcado) return;
+            const btnConfirmarDup =
+              document.getElementById("btn-salvar-palavra");
+            definirBotaoCarregando(btnConfirmarDup, true, "Registrando...");
+            await chamarApi(
+              Object.assign({}, payload, { confirmar_duplicada: true }),
+            );
+            definirBotaoCarregando(btnConfirmarDup, false);
+            fecharEResetarModalPalavra();
+            await carregarPalavras();
+          };
+          return;
+        }
+
+        if (!resp.sucesso) {
+          erroEl.textContent = resp.erro;
+          erroEl.classList.remove("oculto");
+          return;
+        }
+
+        fecharEResetarModalPalavra();
+        await carregarPalavras();
+      }
+      document.getElementById("btn-salvar-palavra").onclick =
+        salvarPalavraHandlerPadrao;
+
+      function fecharEResetarModalPalavra() {
+        document.getElementById("modal-palavra").classList.add("oculto");
+        // restaura o listener padrão (caso tenha sido sobrescrito pelo fluxo de duplicada)
+        document.getElementById("btn-salvar-palavra").onclick =
+          salvarPalavraHandlerPadrao;
+      }
+
+      /* ---------- MODAL EXCLUSÃO ---------- */
+      function abrirModalExclusao(palavra) {
+        palavraParaExcluir = palavra.id;
+        document.getElementById("motivo-exclusao").value = "";
+        document.getElementById("exclusao-erro").classList.add("oculto");
+        document.getElementById("modal-exclusao").classList.remove("oculto");
+      }
+      document.getElementById("btn-cancelar-exclusao").onclick = () =>
+        document.getElementById("modal-exclusao").classList.add("oculto");
+      document.getElementById("btn-confirmar-exclusao").onclick = async () => {
+        const motivo = document.getElementById("motivo-exclusao").value.trim();
+        if (!motivo) {
+          document.getElementById("exclusao-erro").textContent =
+            "Informe o motivo da exclusão.";
+          document.getElementById("exclusao-erro").classList.remove("oculto");
+          return;
+        }
+        const btnConfirmarExclusao = document.getElementById(
+          "btn-confirmar-exclusao",
+        );
+        definirBotaoCarregando(btnConfirmarExclusao, true, "Excluindo...");
+        const resp = await chamarApi({
+          action: "excluirPalavra",
+          usuario_id: sessao.id,
+          palavra_id: palavraParaExcluir,
+          motivo_exclusao: motivo,
+        });
+        definirBotaoCarregando(btnConfirmarExclusao, false);
+        if (!resp.sucesso) {
+          document.getElementById("exclusao-erro").textContent = resp.erro;
+          document.getElementById("exclusao-erro").classList.remove("oculto");
+          return;
+        }
+        document.getElementById("modal-exclusao").classList.add("oculto");
+        await carregarPalavras();
+      };
+
+      /* ======================= FLASHCARDS ======================= */
+      document.getElementById("btn-iniciar-flash").onclick = async () => {
+        const btnIniciarFlash = document.getElementById("btn-iniciar-flash");
+        definirBotaoCarregando(btnIniciarFlash, true, "Preparando cartas...");
+        const idiomasSelecionados = Array.from(
+          document.querySelectorAll("#flash-idiomas-checkboxes input:checked"),
+        ).map((i) => i.value);
+        const quantidade = document.getElementById("flash-quantidade").value;
+        const resp = await chamarApi({
+          action: "flashcardsSessao",
+          usuario_id_solicitante: sessao.id,
+          idiomas_selecionados: idiomasSelecionados.join(","),
+          quantidade,
+        });
+        definirBotaoCarregando(btnIniciarFlash, false);
+        flashcardsFila = resp.cartas || [];
+        flashcardIndice = 0;
+        if (!flashcardsFila.length) {
+          alert(
+            "Nenhuma palavra disponível pra treinar com esses filtros ainda.",
+          );
+          return;
+        }
+        document.getElementById("flash-config-area").classList.add("oculto");
+        document.getElementById("flash-fim-area").classList.add("oculto");
+        document.getElementById("flash-palco-area").classList.remove("oculto");
+        mostrarCartaAtual();
+      };
+
+      function mostrarCartaAtual() {
+        const carta = flashcardsFila[flashcardIndice];
+        const cartaoEl = document.getElementById("cartao-flash");
+        const innerEl = cartaoEl.querySelector(".cartao-inner");
+
+        // desliga a transição, reseta o card (sem animação) e só depois reativa,
+        // evitando que o verso da carta nova apareça durante a virada de volta
+        innerEl.style.transition = "none";
+        cartaoEl.classList.remove("virado");
+
+        document.getElementById("fc-idioma-frente").textContent =
+          carta.idioma_emoji + " " + carta.idioma_nome;
+        document.getElementById("fc-idioma-verso").textContent =
+          carta.idioma_emoji + " " + carta.idioma_nome;
+        document.getElementById("fc-palavra").textContent = carta.palavra;
+        document.getElementById("fc-significado").textContent =
+          carta.significado;
+        document.getElementById("fc-obs").textContent = carta.observacao || "";
+        document.getElementById("flash-progresso").textContent =
+          `Carta ${flashcardIndice + 1} de ${flashcardsFila.length}`;
+
+        // força o navegador a aplicar o reset acima antes de reativar a transição
+        void innerEl.offsetHeight;
+        innerEl.style.transition = "";
+      }
+
+      document.getElementById("cartao-flash").onclick = () => {
+        document.getElementById("cartao-flash").classList.toggle("virado");
+      };
+
+      async function responderFlashcard(lembrou) {
+        const carta = flashcardsFila[flashcardIndice];
+        await chamarApi({
+          action: "flashcardResposta",
+          palavra_id: carta.id,
+          lembrou,
+        });
+        flashcardIndice++;
+        if (flashcardIndice >= flashcardsFila.length) {
+          document.getElementById("flash-palco-area").classList.add("oculto");
+          document.getElementById("flash-fim-area").classList.remove("oculto");
+        } else {
+          mostrarCartaAtual();
+        }
+      }
+      document.getElementById("btn-lembrei").onclick = () =>
+        responderFlashcard(true);
+      document.getElementById("btn-nao-lembrei").onclick = () =>
+        responderFlashcard(false);
+      document.getElementById("btn-encerrar-flash").onclick = () => {
+        document.getElementById("flash-palco-area").classList.add("oculto");
+        document.getElementById("flash-config-area").classList.remove("oculto");
+      };
+      document.getElementById("btn-nova-sessao").onclick = () => {
+        document.getElementById("flash-fim-area").classList.add("oculto");
+        document.getElementById("flash-config-area").classList.remove("oculto");
+      };
+
+      /* ======================= ANÁLISES ======================= */
+      function formatarDataISO(d) {
+        const ano = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, "0");
+        const dia = String(d.getDate()).padStart(2, "0");
+        return `${ano}-${mes}-${dia}`;
+      }
+      function formatarDataBR(iso) {
+        if (!iso) return "";
+        const [a, m, d] = iso.split("-");
+        return `${d}/${m}/${a}`;
+      }
+
+      function calcularPeriodoAnalytics() {
+        if (analyticsModo === "personalizado") {
+          return {
+            inicio: document.getElementById("analytics-data-inicio").value,
+            fim: document.getElementById("analytics-data-fim").value,
+          };
+        }
+        const ref = new Date(analyticsReferencia);
+        if (analyticsModo === "hoje") {
+          const iso = formatarDataISO(ref);
+          return { inicio: iso, fim: iso };
+        }
+        if (analyticsModo === "semana") {
+          const inicio = new Date(ref);
+          inicio.setDate(ref.getDate() - ref.getDay());
+          const fim = new Date(inicio);
+          fim.setDate(inicio.getDate() + 6);
+          return { inicio: formatarDataISO(inicio), fim: formatarDataISO(fim) };
+        }
+        // mes
+        const inicio = new Date(ref.getFullYear(), ref.getMonth(), 1);
+        const fim = new Date(ref.getFullYear(), ref.getMonth() + 1, 0);
+        return { inicio: formatarDataISO(inicio), fim: formatarDataISO(fim) };
+      }
+
+      function rotuloPeriodoAnalytics() {
+        const { inicio, fim } = calcularPeriodoAnalytics();
+        if (analyticsModo === "mes") {
+          return analyticsReferencia.toLocaleDateString("pt-BR", {
+            month: "long",
+            year: "numeric",
+          });
+        }
+        if (analyticsModo === "hoje") return formatarDataBR(inicio);
+        return `${formatarDataBR(inicio)} — ${formatarDataBR(fim)}`;
+      }
+
+      function navegarPeriodoAnalytics(direcao) {
+        if (analyticsModo === "semana") {
+          analyticsReferencia.setDate(
+            analyticsReferencia.getDate() + direcao * 7,
+          );
+        } else if (analyticsModo === "mes") {
+          analyticsReferencia.setMonth(
+            analyticsReferencia.getMonth() + direcao,
+          );
+        }
+        carregarAnalytics();
+      }
+
+      document
+        .querySelectorAll(".analytics-periodo button[data-periodo]")
+        .forEach((btn) => {
+          btn.onclick = () => {
+            analyticsModo = btn.dataset.periodo;
+            document
+              .querySelectorAll(".analytics-periodo button[data-periodo]")
+              .forEach((b) => b.classList.toggle("ativo", b === btn));
+            document
+              .getElementById("analytics-personalizado-area")
+              .classList.toggle("oculto", analyticsModo !== "personalizado");
+            document
+              .getElementById("analytics-nav-periodo")
+              .classList.toggle(
+                "oculto",
+                analyticsModo === "hoje" || analyticsModo === "personalizado",
+              );
+            if (analyticsModo === "personalizado") {
+              if (!document.getElementById("analytics-data-inicio").value) {
+                const hoje = new Date();
+                const primeiroDia = new Date(
+                  hoje.getFullYear(),
+                  hoje.getMonth(),
+                  1,
+                );
+                document.getElementById("analytics-data-inicio").value =
+                  formatarDataISO(primeiroDia);
+                document.getElementById("analytics-data-fim").value =
+                  formatarDataISO(hoje);
+              }
+            } else {
+              carregarAnalytics();
+            }
+          };
+        });
+      document.getElementById("analytics-anterior").onclick = () =>
+        navegarPeriodoAnalytics(-1);
+      document.getElementById("analytics-proximo").onclick = () =>
+        navegarPeriodoAnalytics(1);
+      document.getElementById("analytics-aplicar-personalizado").onclick = () =>
+        carregarAnalytics();
+
+      async function carregarAnalytics() {
+        document.getElementById("analytics-conteudo").innerHTML =
+          linhaCarregando("Calculando estatísticas...");
+        const { inicio, fim } = calcularPeriodoAnalytics();
+        document.getElementById("analytics-periodo-label").textContent =
+          rotuloPeriodoAnalytics();
+
+        const resp = await chamarApi({
+          action: "obterAnalytics",
+          usuario_id_solicitante: sessao.id,
+          data_inicio: inicio,
+          data_fim: fim,
+        });
+        if (!resp.sucesso) {
+          document.getElementById("analytics-conteudo").innerHTML =
+            `<p class="erro-msg">${escapeHtml(resp.erro)}</p>`;
+          return;
+        }
+        renderizarAnalytics(resp);
+      }
+
+      function cardAnalytics(titulo, total, maxDoGrupo, breakdown) {
+        const porcentagem = maxDoGrupo
+          ? Math.round((total / maxDoGrupo) * 100)
+          : 0;
+        const chips = Object.entries(breakdown || {})
+          .sort((a, b) => b[1] - a[1])
+          .map(
+            ([nome, qtd]) =>
+              `<span class="analytics-chip">${escapeHtml(nome)}: ${qtd}</span>`,
+          )
+          .join("");
+        return `
+    <div class="analytics-card">
+      <div class="analytics-card-topo">
+        <span>${escapeHtml(titulo)}</span>
+        <span>${total}</span>
+      </div>
+      <div class="analytics-barra"><div class="analytics-barra-preenchida" style="width:${porcentagem}%;"></div></div>
+      <div class="analytics-chips">${chips}</div>
+    </div>
+  `;
+      }
+
+      function renderizarAnalytics(dados) {
+        const maiorUsuario = dados.por_usuario[0];
+        const maiorIdioma = dados.por_idioma[0];
+        const maxUsuario = maiorUsuario ? maiorUsuario.total : 0;
+        const maxIdioma = maiorIdioma ? maiorIdioma.total : 0;
+
+        document.getElementById("analytics-conteudo").innerHTML = `
+    <div class="analytics-resumo">
+      <div class="analytics-resumo-card">
+        <div class="analytics-resumo-numero">${dados.total_palavras}</div>
+        <div class="analytics-resumo-label">palavras cadastradas</div>
+      </div>
+      <div class="analytics-resumo-card">
+        <div class="analytics-resumo-numero">${maiorUsuario ? escapeHtml(maiorUsuario.nome) : "—"}</div>
+        <div class="analytics-resumo-label">membro mais ativo</div>
+      </div>
+      <div class="analytics-resumo-card">
+        <div class="analytics-resumo-numero">${maiorIdioma ? (maiorIdioma.emoji ? maiorIdioma.emoji + " " : "") + escapeHtml(maiorIdioma.nome) : "—"}</div>
+        <div class="analytics-resumo-label">idioma mais praticado</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 24px">
+      <div>
+        <h2>Membros</h2>
+        <div class="analytics-lista">
+          ${
+            dados.por_usuario.length
+              ? dados.por_usuario
+                  .map((u) =>
+                    cardAnalytics(u.nome, u.total, maxUsuario, u.porIdioma),
+                  )
+                  .join("")
+              : '<p style="color:var(--texto-suave)">Sem cadastros nesse período.</p>'
+          }
+        </div>
+      </div>
+      <div>
+        <h2>Idiomas</h2>
+        <div class="analytics-lista">
+          ${
+            dados.por_idioma.length
+              ? dados.por_idioma
+                  .map((i) =>
+                    cardAnalytics(
+                      (i.emoji ? i.emoji + " " : "") + i.nome,
+                      i.total,
+                      maxIdioma,
+                      i.porUsuario,
+                    ),
+                  )
+                  .join("")
+              : '<p style="color:var(--texto-suave)">Sem cadastros nesse período.</p>'
+          }
+        </div>
+      </div>
+    </div>
+  `;
+      }
+
+      /* ======================= LOG DE DUPLICADAS ======================= */
+      let duplicadasCache = [];
+      async function carregarDuplicadas() {
+        document.getElementById("tbody-duplicadas").innerHTML =
+          `<tr><td colspan="4">${linhaCarregando("Carregando tentativas...")}</td></tr>`;
+        const resp = await chamarApi({
+          action: "listarLogDuplicadas",
+          usuario_id_solicitante: sessao.id,
+        });
+        const corpo = document.getElementById("tbody-duplicadas");
+        if (!resp.sucesso) {
+          corpo.innerHTML = `<tr><td colspan="4">${resp.erro}</td></tr>`;
+          return;
+        }
+        duplicadasCache = resp.log || [];
+        corpo.innerHTML =
+          duplicadasCache
+            .map(
+              (l, i) => `
+    <tr>
+      <td>${escapeHtml(l.palavra_tentada)}</td>
+      <td>${l.idioma_emoji}</td>
+      <td>${formatarData(l.data_tentativa)}</td>
+      <td><button class="btn-neutro btn-ver-duplicada" data-idx="${i}"><i class="fa fa-info-circle"></i></button></td>
+    </tr>
+  `,
+            )
+            .join("") ||
+          '<tr><td colspan="4">Nenhuma tentativa registrada.</td></tr>';
+      }
+      document
+        .getElementById("tbody-duplicadas")
+        .addEventListener("click", (e) => {
+          const btn = e.target.closest(".btn-ver-duplicada");
+          if (!btn) return;
+          abrirDetalhesDuplicada(duplicadasCache[Number(btn.dataset.idx)]);
+        });
+
+      /* ======================= LIXEIRA ======================= */
+      let lixeiraCache = [];
+      async function carregarLixeira() {
+        document.getElementById("tbody-lixeira").innerHTML =
+          `<tr><td colspan="4">${linhaCarregando("Carregando lixeira...")}</td></tr>`;
+        const resp = await chamarApi({
+          action: "listarLixeira",
+          usuario_id_solicitante: sessao.id,
+        });
+        const corpo = document.getElementById("tbody-lixeira");
+        if (!resp.sucesso) {
+          corpo.innerHTML = `<tr><td colspan="4">${resp.erro}</td></tr>`;
+          return;
+        }
+        lixeiraCache = resp.lixeira || [];
+        corpo.innerHTML =
+          lixeiraCache
+            .map(
+              (l, i) => `
+    <tr>
+      <td>${escapeHtml(l.palavra)}</td>
+      <td>${l.idioma_emoji}</td>
+      <td>${formatarData(l.data_exclusao)}</td>
+      <td><button class="btn-neutro btn-ver-lixeira" data-idx="${i}"><i class="fa fa-info-circle"></i></button></td>
+    </tr>
+  `,
+            )
+            .join("") ||
+          '<tr><td colspan="4">Nenhuma palavra excluída.</td></tr>';
+      }
+      document
+        .getElementById("tbody-lixeira")
+        .addEventListener("click", (e) => {
+          const btn = e.target.closest(".btn-ver-lixeira");
+          if (!btn) return;
+          abrirDetalhesLixeira(lixeiraCache[Number(btn.dataset.idx)]);
+        });
+
+      /* ======================= ADMIN ======================= */
+      async function carregarAdmin() {
+        document.getElementById("tbody-usuarios").innerHTML =
+          `<tr><td colspan="6">${linhaCarregando("Carregando usuários...")}</td></tr>`;
+        const respU = await chamarApi({
+          action: "listarUsuarios",
+          usuario_id_solicitante: sessao.id,
+        });
+        usuariosCache = respU.usuarios || [];
+        document.getElementById("tbody-usuarios").innerHTML = usuariosCache
+          .map(
+            (u) => `
+    <tr>
+      <td>${escapeHtml(u.nome)}</td>
+      <td>${u.papel}</td>
+      <td>${u.permissao_leitura}</td>
+      <td>${u.permissao_edicao}</td>
+      <td>${u.ativo ? "✅" : "❌"}</td>
+      <td><button class="btn-neutro" data-toggle-ativo="${u.id}" data-atual="${u.ativo}">${u.ativo ? "Desativar" : "Ativar"}</button></td>
+    </tr>
+  `,
+          )
+          .join("");
+
+        document.getElementById("tbody-idiomas").innerHTML = idiomasCache
+          .map(
+            (i) => `
+    <tr><td>${i.emoji_bandeira}</td><td>${escapeHtml(i.nome)}</td></tr>
+  `,
+          )
+          .join("");
+      }
+
+      document
+        .getElementById("tbody-usuarios")
+        .addEventListener("click", async (e) => {
+          const btn = e.target.closest("button[data-toggle-ativo]");
+          if (!btn) return;
+          const ativo = btn.dataset.atual === "true";
+          definirBotaoCarregando(btn, true, "");
+          await chamarApi({
+            action: "editarUsuario",
+            usuario_id_solicitante: sessao.id,
+            usuario_id_alvo: btn.dataset.toggleAtivo,
+            ativo: !ativo,
+          });
+          await carregarAdmin();
+        });
+
+      document.getElementById("btn-novo-idioma").onclick = async () => {
+        const nome = document.getElementById("novo-idioma-nome").value.trim();
+        const emoji = document.getElementById("novo-idioma-emoji").value.trim();
+        if (!nome || !emoji) return;
+        const btnNovoIdioma = document.getElementById("btn-novo-idioma");
+        definirBotaoCarregando(btnNovoIdioma, true, "Adicionando...");
+        await chamarApi({
+          action: "criarIdioma",
+          usuario_id: sessao.id,
+          nome,
+          emoji_bandeira: emoji,
+        });
+        document.getElementById("novo-idioma-nome").value = "";
+        document.getElementById("novo-idioma-emoji").value = "";
+        const resp = await chamarApi({ action: "listarIdiomas" });
+        idiomasCache = resp.idiomas || [];
+        preencherSelectsIdioma();
+        await carregarAdmin();
+        definirBotaoCarregando(btnNovoIdioma, false);
+      };
+
+      document.getElementById("btn-novo-usuario").onclick = () => {
+        [
+          "nu-nome",
+          "nu-login",
+          "nu-senha",
+          "nu-idiomas-leitura",
+          "nu-idiomas-edicao",
+        ].forEach((id) => (document.getElementById(id).value = ""));
+        document.getElementById("nu-erro").classList.add("oculto");
+        document.getElementById("modal-usuario").classList.remove("oculto");
+      };
+      document.getElementById("btn-cancelar-usuario").onclick = () =>
+        document.getElementById("modal-usuario").classList.add("oculto");
+      document.getElementById("btn-salvar-usuario").onclick = async () => {
+        const payload = {
+          action: "criarUsuario",
+          usuario_id_solicitante: sessao.id,
+          nome: document.getElementById("nu-nome").value.trim(),
+          usuario_login: document.getElementById("nu-login").value.trim(),
+          senha: document.getElementById("nu-senha").value,
+          papel: document.getElementById("nu-papel").value,
+          permissao_leitura: document.getElementById("nu-leitura").value,
+          idiomas_leitura: document
+            .getElementById("nu-idiomas-leitura")
+            .value.trim(),
+          permissao_edicao: document.getElementById("nu-edicao").value,
+          idiomas_edicao: document
+            .getElementById("nu-idiomas-edicao")
+            .value.trim(),
+        };
+        const btnSalvarUsuario = document.getElementById("btn-salvar-usuario");
+        definirBotaoCarregando(btnSalvarUsuario, true, "Criando...");
+        const resp = await chamarApi(payload);
+        definirBotaoCarregando(btnSalvarUsuario, false);
+        if (!resp.sucesso) {
+          document.getElementById("nu-erro").textContent = resp.erro;
+          document.getElementById("nu-erro").classList.remove("oculto");
+          return;
+        }
+        document.getElementById("modal-usuario").classList.add("oculto");
+        await carregarAdmin();
+      };
+
+      /* ======================= UTILITÁRIOS ======================= */
+      function escapeHtml(txt) {
+        if (txt === undefined || txt === null) return "";
+        return txt
+          .toString()
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+      function formatarData(valor) {
+        if (!valor) return "";
+        const d = new Date(valor);
+        if (isNaN(d)) return valor;
+        return d.toLocaleDateString("pt-BR");
+      }
+
+      /* ======================= BOOT ======================= */
+      (async function boot() {
+        const logou = await tentarAutoLogin();
+        if (!logou) {
+          mostrarOverlayBoot(false);
+          document.getElementById("tela-login").style.display = "flex";
+        }
+      })();
+    </script>
+  </body>
+</html>
