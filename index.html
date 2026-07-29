@@ -1107,6 +1107,16 @@
       async function chamarApi(payload, tentativa) {
         tentativa = tentativa || 1;
 
+        // ID único por tentativa "lógica" de chamada (persiste entre retries,
+        // já que o payload é reaproveitado nas chamadas recursivas abaixo).
+        // Serve pro servidor detectar quando o retry é o MESMO pedido de novo
+        // (ex.: já criou a palavra mas a resposta se perdeu) e não repetir a ação.
+        if (!payload._reqId) {
+          payload._reqId = (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : Date.now() + "-" + Math.random().toString(36).slice(2);
+        }
+
         // manda os dados também na URL (query string), não só no corpo do POST —
         // isso evita perder a ação caso o navegador derrube o corpo durante o
         // redirecionamento interno do Apps Script (bug conhecido e intermitente).
