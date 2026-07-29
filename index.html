@@ -1128,12 +1128,19 @@
         });
         const url = CONFIG.API_URL + "?" + query.toString();
 
+        // sem isso, se o Apps Script simplesmente não responder (nem erro, nem sucesso),
+        // o fetch fica pendurado pra sempre e o botão nunca sai de "Salvando...".
+        const controlador = new AbortController();
+        const tempoLimite = setTimeout(() => controlador.abort(), 15000); // 15s por tentativa
+
         try {
           const resp = await fetch(url, {
             method: "POST",
             body: JSON.stringify(payload),
             cache: "no-store",
+            signal: controlador.signal,
           });
+          clearTimeout(tempoLimite);
           const texto = await resp.text();
           try {
             return JSON.parse(texto);
@@ -1141,6 +1148,7 @@
             throw new Error("Resposta inválida do servidor: " + texto.slice(0, 200));
           }
         } catch (erro) {
+          clearTimeout(tempoLimite);
           if (tentativa < 3) {
             await new Promise((r) => setTimeout(r, 700 * tentativa));
             return chamarApi(payload, tentativa + 1);
@@ -1589,11 +1597,26 @@
               idioma_id,
             };
 
-        const resp = await chamarApi(payload);
+        // Dá um prazo curto pra resposta chegar. Se passar disso, é mais provável
+        // que já tenha salvo no servidor (só a confirmação que demorou) do que
+        // realmente ter falhado — nesse caso é melhor fechar e atualizar a lista
+        // do que deixar o usuário parado esperando o "Salvando...".
+        const resp = await Promise.race([
+          chamarApi(payload),
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ _demorou: true }), 8000),
+          ),
+        ]);
         definirBotaoCarregando(
           document.getElementById("btn-salvar-palavra"),
           false,
         );
+
+        if (resp._demorou) {
+          fecharEResetarModalPalavra();
+          await carregarPalavras();
+          return;
+        }
 
         if (!resp.sucesso && resp.duplicada) {
           const ex = resp.palavra_existente;
