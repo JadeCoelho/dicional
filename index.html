@@ -585,7 +585,7 @@
     <!-- ===================== OVERLAY DE CARREGAMENTO INICIAL ===================== -->
     <div id="overlay-boot">
       <div class="spinner spinner-grande"></div>
-      <p id="overlay-boot-texto">Carregando seu dicionário...</p>
+      <p id="overlay-boot-texto">Carregando seu dicionário... Paciência é uma virtude...</p>
     </div>
 
     <!-- ===================== LOGIN ===================== -->
@@ -1217,7 +1217,7 @@
       /* ======================= INÍCIO DO APP ======================= */
       async function iniciarApp() {
         document.getElementById("tela-login").style.display = "none";
-        mostrarOverlayBoot(true, "Preparando seu dicionário...");
+        mostrarOverlayBoot(true, "Preparando seu dicionário... Tudo no meu tempo...");
         document.getElementById("app-shell").style.display = "flex";
         document.getElementById("saudacao").textContent = "Olá, " + sessao.nome;
         aplicarTema(sessao.tema_preferido || "light");
@@ -1321,7 +1321,7 @@
 
       async function carregarPalavras() {
         document.getElementById("lista-palavras").innerHTML = linhaCarregando(
-          "Carregando palavras...",
+          "Carregando palavras... Água mole em pedra dura, tanto bate até que fura...",
         );
         document.getElementById("paginacao").innerHTML = "";
         const resp = await chamarApi({
@@ -1643,7 +1643,7 @@
       /* ======================= FLASHCARDS ======================= */
       document.getElementById("btn-iniciar-flash").onclick = async () => {
         const btnIniciarFlash = document.getElementById("btn-iniciar-flash");
-        definirBotaoCarregando(btnIniciarFlash, true, "Preparando cartas...");
+        definirBotaoCarregando(btnIniciarFlash, true, "Preparando cartas... Respira... Relaxa o ânus...");
         const idiomasSelecionados = Array.from(
           document.querySelectorAll("#flash-idiomas-checkboxes input:checked"),
         ).map((i) => i.value);
@@ -1834,7 +1834,7 @@
 
       async function carregarAnalytics() {
         document.getElementById("analytics-conteudo").innerHTML =
-          linhaCarregando("Calculando estatísticas...");
+          linhaCarregando("Calculando estatísticas... Calma, usuário(a) de TikTok...");
         const { inicio, fim } = calcularPeriodoAnalytics();
         document.getElementById("analytics-periodo-label").textContent =
           rotuloPeriodoAnalytics();
@@ -1940,7 +1940,7 @@
       let duplicadasCache = [];
       async function carregarDuplicadas() {
         document.getElementById("tbody-duplicadas").innerHTML =
-          `<tr><td colspan="4">${linhaCarregando("Carregando tentativas...")}</td></tr>`;
+          `<tr><td colspan="4">${linhaCarregando("Carregando tentativas... Guenta, coração...")}</td></tr>`;
         const resp = await chamarApi({
           action: "listarLogDuplicadas",
           usuario_id_solicitante: sessao.id,
