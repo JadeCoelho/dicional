@@ -93,9 +93,15 @@
         width: 320px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
+      .card-login img{
+        width: 60px;
+        margin: auto;
+        display: flex;
+      }
       .card-login h1 {
         font-size: 20px;
         margin-bottom: 4px;
+        text-align: center;
       }
       .card-login p {
         color: var(--texto-suave);
@@ -561,6 +567,12 @@
         .saudacao img {
           width: 35px;
         }
+        .card-palavra button{
+          padding: 3px 6px !important;
+        }
+        .card-palavra .significado{
+          padding-top: 10px;
+        }
       }
     </style>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
@@ -573,12 +585,13 @@
     <!-- ===================== OVERLAY DE CARREGAMENTO INICIAL ===================== -->
     <div id="overlay-boot">
       <div class="spinner spinner-grande"></div>
-      <p id="overlay-boot-texto">Carregando seu dicionário...</p>
+      <p id="overlay-boot-texto">Carregando seu dicionário... Paciência é uma virtude...</p>
     </div>
 
     <!-- ===================== LOGIN ===================== -->
     <div id="tela-login" style="display: none">
       <form class="card-login" id="form-login">
+        <img src="logo.png" alt="logo-dicional">
         <h1>Dicional</h1>
         <div class="campo">
           <label>Usuário</label>
@@ -762,9 +775,8 @@
               <tr>
                 <th>Palavra</th>
                 <th>Idioma</th>
-                <th>Quem tentou</th>
-                <th>Já cadastrada por</th>
                 <th>Data</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="tbody-duplicadas"></tbody>
@@ -779,10 +791,8 @@
               <tr>
                 <th>Palavra</th>
                 <th>Idioma</th>
-                <th>Cadastrada por</th>
-                <th>Excluída por</th>
                 <th>Data</th>
-                <th>Motivo</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="tbody-lixeira"></tbody>
@@ -954,6 +964,58 @@
           </button>
           <button class="btn-perigo" id="btn-confirmar-exclusao">
             Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL DETALHES DUPLICADA ===================== -->
+    <div class="overlay oculto" id="modal-detalhes-duplicada">
+      <div class="modal">
+        <h2 id="detalhes-duplicada-titulo"></h2>
+        <div class="campo">
+          <label>Quem tentou</label>
+          <p id="detalhes-duplicada-tentou"></p>
+        </div>
+        <div class="campo">
+          <label>Já cadastrada por</label>
+          <p id="detalhes-duplicada-original"></p>
+        </div>
+        <div class="campo">
+          <label>Data da tentativa</label>
+          <p id="detalhes-duplicada-data"></p>
+        </div>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-fechar-detalhes-duplicada">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL DETALHES LIXEIRA ===================== -->
+    <div class="overlay oculto" id="modal-detalhes-lixeira">
+      <div class="modal">
+        <h2 id="detalhes-lixeira-titulo"></h2>
+        <div class="campo">
+          <label>Cadastrada por</label>
+          <p id="detalhes-lixeira-cadastrou"></p>
+        </div>
+        <div class="campo">
+          <label>Excluída por</label>
+          <p id="detalhes-lixeira-excluiu"></p>
+        </div>
+        <div class="campo">
+          <label>Data da exclusão</label>
+          <p id="detalhes-lixeira-data"></p>
+        </div>
+        <div class="campo">
+          <label>Motivo</label>
+          <p id="detalhes-lixeira-motivo"></p>
+        </div>
+        <div class="modal-acoes">
+          <button class="btn-neutro" id="btn-fechar-detalhes-lixeira">
+            Fechar
           </button>
         </div>
       </div>
@@ -1187,9 +1249,9 @@
       /* ======================= INÍCIO DO APP ======================= */
       async function iniciarApp() {
         document.getElementById("tela-login").style.display = "none";
-        mostrarOverlayBoot(true, "Preparando seu dicionário...");
+        mostrarOverlayBoot(true, "Preparando seu dicionário... Tudo no meu tempo...");
         document.getElementById("app-shell").style.display = "flex";
-        // document.getElementById("saudacao").textContent = "Olá, " + sessao.nome;
+        document.getElementById("saudacao").textContent = "Olá, " + sessao.nome;
         aplicarTema(sessao.tema_preferido || "light");
 
         document
@@ -1291,7 +1353,7 @@
 
       async function carregarPalavras() {
         document.getElementById("lista-palavras").innerHTML = linhaCarregando(
-          "Carregando palavras...",
+          "Carregando palavras... Água mole em pedra dura, tanto bate até que fura...",
         );
         document.getElementById("paginacao").innerHTML = "";
         const resp = await chamarApi({
@@ -1392,6 +1454,44 @@
       }
       document.getElementById("btn-fechar-detalhes").onclick = () =>
         document.getElementById("modal-detalhes").classList.add("oculto");
+
+      function abrirDetalhesDuplicada(l) {
+        document.getElementById("detalhes-duplicada-titulo").textContent =
+          l.idioma_emoji + " " + l.palavra_tentada;
+        document.getElementById("detalhes-duplicada-tentou").textContent =
+          l.usuario_tentativa_nome;
+        document.getElementById("detalhes-duplicada-original").textContent =
+          l.usuario_original_nome;
+        document.getElementById("detalhes-duplicada-data").textContent =
+          formatarData(l.data_tentativa);
+        document
+          .getElementById("modal-detalhes-duplicada")
+          .classList.remove("oculto");
+      }
+      document.getElementById("btn-fechar-detalhes-duplicada").onclick = () =>
+        document
+          .getElementById("modal-detalhes-duplicada")
+          .classList.add("oculto");
+
+      function abrirDetalhesLixeira(l) {
+        document.getElementById("detalhes-lixeira-titulo").textContent =
+          l.idioma_emoji + " " + l.palavra;
+        document.getElementById("detalhes-lixeira-cadastrou").textContent =
+          l.usuario_nome;
+        document.getElementById("detalhes-lixeira-excluiu").textContent =
+          l.excluido_por_nome;
+        document.getElementById("detalhes-lixeira-data").textContent =
+          formatarData(l.data_exclusao);
+        document.getElementById("detalhes-lixeira-motivo").textContent =
+          l.motivo_exclusao || "—";
+        document
+          .getElementById("modal-detalhes-lixeira")
+          .classList.remove("oculto");
+      }
+      document.getElementById("btn-fechar-detalhes-lixeira").onclick = () =>
+        document
+          .getElementById("modal-detalhes-lixeira")
+          .classList.add("oculto");
 
       /* ---------- MODAL CADASTRO/EDIÇÃO ---------- */
       document.getElementById("btn-nova-palavra").onclick = () =>
@@ -1575,7 +1675,7 @@
       /* ======================= FLASHCARDS ======================= */
       document.getElementById("btn-iniciar-flash").onclick = async () => {
         const btnIniciarFlash = document.getElementById("btn-iniciar-flash");
-        definirBotaoCarregando(btnIniciarFlash, true, "Preparando cartas...");
+        definirBotaoCarregando(btnIniciarFlash, true, "Preparando cartas... Respira... Relaxa o ânus...");
         const idiomasSelecionados = Array.from(
           document.querySelectorAll("#flash-idiomas-checkboxes input:checked"),
         ).map((i) => i.value);
@@ -1766,7 +1866,7 @@
 
       async function carregarAnalytics() {
         document.getElementById("analytics-conteudo").innerHTML =
-          linhaCarregando("Calculando estatísticas...");
+          linhaCarregando("Calculando estatísticas... Calma, usuário(a) de TikTok...");
         const { inicio, fim } = calcularPeriodoAnalytics();
         document.getElementById("analytics-periodo-label").textContent =
           rotuloPeriodoAnalytics();
@@ -1869,65 +1969,80 @@
       }
 
       /* ======================= LOG DE DUPLICADAS ======================= */
+      let duplicadasCache = [];
       async function carregarDuplicadas() {
         document.getElementById("tbody-duplicadas").innerHTML =
-          `<tr><td colspan="5">${linhaCarregando("Carregando tentativas...")}</td></tr>`;
+          `<tr><td colspan="4">${linhaCarregando("Carregando tentativas... Guenta, coração...")}</td></tr>`;
         const resp = await chamarApi({
           action: "listarLogDuplicadas",
           usuario_id_solicitante: sessao.id,
         });
         const corpo = document.getElementById("tbody-duplicadas");
         if (!resp.sucesso) {
-          corpo.innerHTML = `<tr><td colspan="5">${resp.erro}</td></tr>`;
+          corpo.innerHTML = `<tr><td colspan="4">${resp.erro}</td></tr>`;
           return;
         }
+        duplicadasCache = resp.log || [];
         corpo.innerHTML =
-          resp.log
+          duplicadasCache
             .map(
-              (l) => `
+              (l, i) => `
     <tr>
       <td>${escapeHtml(l.palavra_tentada)}</td>
-      <td>${l.idioma_emoji} ${escapeHtml(l.idioma_nome)}</td>
-      <td>${escapeHtml(l.usuario_tentativa_nome)}</td>
-      <td>${escapeHtml(l.usuario_original_nome)}</td>
+      <td>${l.idioma_emoji}</td>
       <td>${formatarData(l.data_tentativa)}</td>
+      <td><button class="btn-neutro btn-ver-duplicada" data-idx="${i}"><i class="fa fa-info-circle"></i></button></td>
     </tr>
   `,
             )
             .join("") ||
-          '<tr><td colspan="5">Nenhuma tentativa registrada.</td></tr>';
+          '<tr><td colspan="4">Nenhuma tentativa registrada.</td></tr>';
       }
+      document
+        .getElementById("tbody-duplicadas")
+        .addEventListener("click", (e) => {
+          const btn = e.target.closest(".btn-ver-duplicada");
+          if (!btn) return;
+          abrirDetalhesDuplicada(duplicadasCache[Number(btn.dataset.idx)]);
+        });
 
       /* ======================= LIXEIRA ======================= */
+      let lixeiraCache = [];
       async function carregarLixeira() {
         document.getElementById("tbody-lixeira").innerHTML =
-          `<tr><td colspan="6">${linhaCarregando("Carregando lixeira...")}</td></tr>`;
+          `<tr><td colspan="4">${linhaCarregando("Carregando lixeira...")}</td></tr>`;
         const resp = await chamarApi({
           action: "listarLixeira",
           usuario_id_solicitante: sessao.id,
         });
         const corpo = document.getElementById("tbody-lixeira");
         if (!resp.sucesso) {
-          corpo.innerHTML = `<tr><td colspan="6">${resp.erro}</td></tr>`;
+          corpo.innerHTML = `<tr><td colspan="4">${resp.erro}</td></tr>`;
           return;
         }
+        lixeiraCache = resp.lixeira || [];
         corpo.innerHTML =
-          resp.lixeira
+          lixeiraCache
             .map(
-              (l) => `
+              (l, i) => `
     <tr>
       <td>${escapeHtml(l.palavra)}</td>
-      <td>${l.idioma_emoji} ${escapeHtml(l.idioma_nome)}</td>
-      <td>${escapeHtml(l.usuario_nome)}</td>
-      <td>${escapeHtml(l.excluido_por_nome)}</td>
+      <td>${l.idioma_emoji}</td>
       <td>${formatarData(l.data_exclusao)}</td>
-      <td>${escapeHtml(l.motivo_exclusao)}</td>
+      <td><button class="btn-neutro btn-ver-lixeira" data-idx="${i}"><i class="fa fa-info-circle"></i></button></td>
     </tr>
   `,
             )
             .join("") ||
-          '<tr><td colspan="6">Nenhuma palavra excluída.</td></tr>';
+          '<tr><td colspan="4">Nenhuma palavra excluída.</td></tr>';
       }
+      document
+        .getElementById("tbody-lixeira")
+        .addEventListener("click", (e) => {
+          const btn = e.target.closest(".btn-ver-lixeira");
+          if (!btn) return;
+          abrirDetalhesLixeira(lixeiraCache[Number(btn.dataset.idx)]);
+        });
 
       /* ======================= ADMIN ======================= */
       async function carregarAdmin() {
