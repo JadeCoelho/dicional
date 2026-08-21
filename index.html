@@ -157,6 +157,9 @@
       .saudacao img {
         width: 50px;
       }
+      #logo-header {
+        cursor: pointer;
+      }
       nav {
         display: flex;
         gap: 6px;
@@ -630,7 +633,12 @@
     <div id="app-shell">
       <header>
         <div class="saudacao">
-          <img src="logo.png" alt="logo-dicional" />
+          <img
+            src="logo.png"
+            alt="logo-dicional"
+            id="logo-header"
+            title="Voltar para a página inicial"
+          />
           <h1 id="saudacao">Dicional</h1>
         </div>
         <nav id="menu-nav">
@@ -678,6 +686,14 @@
               id="filtro-busca"
               placeholder="Buscar palavra ou significado..."
             />
+            <button
+              class="btn-neutro"
+              id="btn-buscar"
+              title="Buscar"
+              type="button"
+            >
+              <i class="fa fa-search"></i>
+            </button>
             <select id="filtro-idioma">
               <option value="todos">Todos os idiomas</option>
             </select>
@@ -690,6 +706,20 @@
               <option value="az">A-Z</option>
               <option value="za">Z-A</option>
             </select>
+            <select id="filtro-itens-pagina" title="Itens por página">
+              <option value="15">15/pág</option>
+              <option value="30">30/pág</option>
+              <option value="50">50/pág</option>
+              <option value="100">100/pág</option>
+            </select>
+            <button
+              class="btn-neutro"
+              id="btn-resetar-filtros"
+              title="Restaurar filtros padrão"
+              type="button"
+            >
+              <i class="fa fa-undo"></i>
+            </button>
             <button class="btn-primario" id="btn-nova-palavra">
               <i class="fa fa-plus"></i>
             </button>
@@ -1095,7 +1125,7 @@
       let idiomasCache = [];
       let usuariosCache = [];
       let paginaAtual = 1;
-      const TAMANHO_PAGINA = 8;
+      let TAMANHO_PAGINA = 15; // (3) padrão 15 por página (era 8), agora ajustável via seletor
       let palavraEmEdicao = null; // id da palavra sendo editada (null = criando)
       let palavraParaExcluir = null;
       let flashcardsFila = [];
@@ -1332,6 +1362,11 @@
         mudarView(btn.dataset.view);
       });
 
+      // (1) Logo do cabeçalho leva de volta pra página inicial (consulta)
+      document.getElementById("logo-header").addEventListener("click", () => {
+        mudarView("consulta");
+      });
+
       async function mudarView(nome) {
         [
           "consulta",
@@ -1357,17 +1392,55 @@
       }
 
       /* ======================= CONSULTA DE PALAVRAS ======================= */
-      [
-        "filtro-busca",
-        "filtro-idioma",
-        "filtro-usuario",
-        "filtro-ordenacao",
-      ].forEach((id) => {
-        document.getElementById(id).addEventListener("input", () => {
+      // (5) filtro-busca NÃO fica mais nesta lista: ele só dispara busca
+      // quando o usuário aperta "Ok" (ou Enter), pra não ficar rodando a
+      // cada tecla digitada e travando com o delay.
+      ["filtro-idioma", "filtro-usuario", "filtro-ordenacao"].forEach(
+        (id) => {
+          document.getElementById(id).addEventListener("change", () => {
+            paginaAtual = 1;
+            carregarPalavras();
+          });
+        },
+      );
+
+      // (5) busca só roda ao clicar em "Ok" ou apertar Enter no campo
+      document.getElementById("btn-buscar").addEventListener("click", () => {
+        paginaAtual = 1;
+        carregarPalavras();
+      });
+      document
+        .getElementById("filtro-busca")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            paginaAtual = 1;
+            carregarPalavras();
+          }
+        });
+
+      // (3) selecionar quantos itens mostrar por página
+      document
+        .getElementById("filtro-itens-pagina")
+        .addEventListener("change", (e) => {
+          TAMANHO_PAGINA = Number(e.target.value) || 15;
           paginaAtual = 1;
           carregarPalavras();
         });
-      });
+
+      // (4) resetar filtros pro padrão
+      document
+        .getElementById("btn-resetar-filtros")
+        .addEventListener("click", () => {
+          document.getElementById("filtro-busca").value = "";
+          document.getElementById("filtro-idioma").value = "todos";
+          document.getElementById("filtro-usuario").value = "todos";
+          document.getElementById("filtro-ordenacao").value = "recentes";
+          document.getElementById("filtro-itens-pagina").value = "15";
+          TAMANHO_PAGINA = 15;
+          paginaAtual = 1;
+          carregarPalavras();
+        });
 
       async function carregarPalavras() {
         document.getElementById("lista-palavras").innerHTML = linhaCarregando(
@@ -1423,18 +1496,30 @@
           Math.ceil(resp.total / TAMANHO_PAGINA),
         );
         document.getElementById("paginacao").innerHTML = `
-    <button class="btn-neutro" id="pag-anterior" ${paginaAtual <= 1 ? "disabled" : ""}><i class="fa fa-angle-left"></i>
+    <button class="btn-neutro" id="pag-primeira" title="Primeira página" ${paginaAtual <= 1 ? "disabled" : ""}><i class="fa fa-angle-double-left"></i>
+</button>
+    <button class="btn-neutro" id="pag-anterior" title="Página anterior" ${paginaAtual <= 1 ? "disabled" : ""}><i class="fa fa-angle-left"></i>
 </button>
     <span>${paginaAtual} de ${totalPaginas}</span>
-    <button class="btn-neutro" id="pag-proxima" ${paginaAtual >= totalPaginas ? "disabled" : ""}><i class="fa fa-angle-right"></i>
+    <button class="btn-neutro" id="pag-proxima" title="Próxima página" ${paginaAtual >= totalPaginas ? "disabled" : ""}><i class="fa fa-angle-right"></i>
+</button>
+    <button class="btn-neutro" id="pag-ultima" title="Última página" ${paginaAtual >= totalPaginas ? "disabled" : ""}><i class="fa fa-angle-double-right"></i>
 </button>
   `;
+        document.getElementById("pag-primeira").onclick = () => {
+          paginaAtual = 1;
+          carregarPalavras();
+        };
         document.getElementById("pag-anterior").onclick = () => {
           paginaAtual--;
           carregarPalavras();
         };
         document.getElementById("pag-proxima").onclick = () => {
           paginaAtual++;
+          carregarPalavras();
+        };
+        document.getElementById("pag-ultima").onclick = () => {
+          paginaAtual = totalPaginas;
           carregarPalavras();
         };
 
@@ -1667,6 +1752,83 @@
         document.getElementById("btn-salvar-palavra").onclick =
           salvarPalavraHandlerPadrao;
       }
+
+      /* ---------- (6) VALIDAÇÃO EM TEMPO REAL DE PALAVRA DUPLICADA ---------- */
+      // Verifica, assim que o usuário tira o foco do campo "Palavra" (ou troca
+      // o idioma), se aquela palavra já existe nesse idioma — sem precisar
+      // preencher significado/observação pra só então descobrir.
+      let tokenVerificacaoPalavra = 0;
+      async function verificarPalavraExistente() {
+        const avisoArea = document.getElementById("aviso-duplicada-area");
+
+        // se o usuário já tentou salvar e caiu no fluxo de "confirmar duplicada",
+        // não sobrescreve aquele aviso/checkbox.
+        if (
+          document.getElementById("btn-salvar-palavra").onclick !==
+          salvarPalavraHandlerPadrao
+        ) {
+          return;
+        }
+
+        const palavraTexto = document
+          .getElementById("form-palavra")
+          .value.trim();
+        const idioma_id = document.getElementById("form-idioma").value;
+
+        if (!palavraTexto || !idioma_id) {
+          avisoArea.classList.add("oculto");
+          avisoArea.innerHTML = "";
+          return;
+        }
+
+        const meuToken = ++tokenVerificacaoPalavra;
+        avisoArea.innerHTML =
+          '<span style="color:var(--texto-suave)"><i class="fa fa-spinner fa-spin"></i> Verificando se a palavra já existe...</span>';
+        avisoArea.classList.remove("oculto");
+
+        const resp = await chamarApi({
+          action: "listarPalavras",
+          usuario_id_solicitante: sessao.id,
+          busca: palavraTexto,
+          idioma_id,
+          filtro_usuario_id: "todos",
+          ordenacao: "az",
+          pagina: 1,
+          tamanho_pagina: 50,
+        });
+
+        // se o usuário já mudou o campo de novo enquanto isso, ignora essa resposta
+        if (meuToken !== tokenVerificacaoPalavra) return;
+
+        const normalizar = (t) => (t || "").trim().toLowerCase();
+        const existente =
+          resp.sucesso &&
+          (resp.palavras || []).find(
+            (p) =>
+              normalizar(p.palavra) === normalizar(palavraTexto) &&
+              String(p.idioma_id) === String(idioma_id) &&
+              String(p.id) !== String(palavraEmEdicao || ""),
+          );
+
+        if (existente) {
+          avisoArea.innerHTML = `⚠️ Essa palavra já está cadastrada nesse idioma.<br>Cadastrada por <b>${escapeHtml(existente.usuario_nome || "—")}</b> em ${formatarData(existente.data_criacao)}.`;
+          avisoArea.classList.remove("oculto");
+        } else {
+          avisoArea.innerHTML =
+            '<span style="color:var(--cor-sucesso)"><i class="fa fa-check-circle"></i> Palavra disponível nesse idioma.</span>';
+          avisoArea.classList.remove("oculto");
+        }
+      }
+      document
+        .getElementById("form-palavra")
+        .addEventListener("blur", verificarPalavraExistente);
+      document
+        .getElementById("form-idioma")
+        .addEventListener("change", () => {
+          if (document.getElementById("form-palavra").value.trim()) {
+            verificarPalavraExistente();
+          }
+        });
 
       /* ---------- MODAL EXCLUSÃO ---------- */
       function abrirModalExclusao(palavra) {
